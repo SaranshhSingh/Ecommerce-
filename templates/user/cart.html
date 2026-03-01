@@ -1,0 +1,138 @@
+{% extends "base.html" %}
+{% block title %}Your Cart - FlaskShop{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>🛒 Your Cart</h1>
+</div>
+
+{% if cart_items %}
+<div class="cart-container">
+    <!-- Desktop Table View -->
+    <div class="table-wrapper cart-table-desktop">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Product</th>
+                    <th>Category</th>
+                    <th>Price</th>
+                    <th>Quantity</th>
+                    <th>Subtotal</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in cart_items %}
+                <tr>
+                    <td>
+                        <a href="{{ url_for('user.product_detail', product_id=item.product.id) }}">
+                            {{ item.product.name }}
+                        </a>
+                    </td>
+                    <td>
+                        {% if item.product.category %}
+                        <span class="category-badge small">{{ item.product.category.icon }} {{
+                            item.product.category.name }}</span>
+                        {% else %}
+                        <span class="text-muted">—</span>
+                        {% endif %}
+                    </td>
+                    <td>${{ "%.2f"|format(item.product.price) }}</td>
+                    <td>
+                        <form method="POST" action="{{ url_for('user.update_cart', item_id=item.id) }}"
+                            class="inline-form">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <input type="number" name="quantity" value="{{ item.quantity }}" min="1"
+                                max="{{ item.product.stock }}" class="qty-input">
+                            <button type="submit" class="btn btn-xs btn-outline">Update</button>
+                        </form>
+                    </td>
+                    <td><strong>${{ "%.2f"|format(item.product.price * item.quantity) }}</strong></td>
+                    <td>
+                        <form method="POST" action="{{ url_for('user.remove_from_cart', item_id=item.id) }}"
+                            style="display:inline;">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <button type="submit" class="btn btn-xs btn-danger">Remove</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td colspan="4" style="text-align: right;"><strong>Subtotal:</strong></td>
+                    <td><strong>${{ "%.2f"|format(total) }}</strong></td>
+                    <td></td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+
+    <!-- Mobile Card View -->
+    <div class="cart-cards">
+        {% for item in cart_items %}
+        <div class="cart-card">
+            <div class="cart-card-header">
+                <h4><a href="{{ url_for('user.product_detail', product_id=item.product.id) }}">{{ item.product.name
+                        }}</a></h4>
+                <span class="cart-card-price">${{ "%.2f"|format(item.product.price) }}</span>
+            </div>
+            {% if item.product.category %}
+            <span class="category-badge small">{{ item.product.category.icon }} {{ item.product.category.name }}</span>
+            {% endif %}
+            <div class="cart-card-body">
+                <form method="POST" action="{{ url_for('user.update_cart', item_id=item.id) }}" class="inline-form">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <input type="number" name="quantity" value="{{ item.quantity }}" min="1"
+                        max="{{ item.product.stock }}" class="qty-input">
+                    <button type="submit" class="btn btn-xs btn-outline">Update</button>
+                </form>
+                <span class="cart-card-subtotal">${{ "%.2f"|format(item.product.price * item.quantity) }}</span>
+                <form method="POST" action="{{ url_for('user.remove_from_cart', item_id=item.id) }}"
+                    style="display:inline;">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" class="btn btn-xs btn-danger">✗</button>
+                </form>
+            </div>
+        </div>
+        {% endfor %}
+        <div class="cart-card-total">
+            <span>Subtotal</span>
+            <span>${{ "%.2f"|format(total) }}</span>
+        </div>
+    </div>
+
+    <!-- Cart Summary -->
+    <div class="cart-summary-box">
+        <div class="cart-summary-row">
+            <span>Subtotal ({{ cart_items|length }} item{{ 's' if cart_items|length != 1 }})</span>
+            <span>${{ "%.2f"|format(total) }}</span>
+        </div>
+        <div class="cart-summary-row">
+            <span>Shipping</span>
+            <span>{% if total >= 50 %}<span class="text-success">FREE</span>{% else %}$9.99{% endif %}</span>
+        </div>
+        <div class="cart-summary-row">
+            <span>Estimated Tax (8%)</span>
+            <span>${{ "%.2f"|format(total * 0.08) }}</span>
+        </div>
+        <div class="cart-summary-divider"></div>
+        <div class="cart-summary-row cart-summary-total">
+            <span>Estimated Total</span>
+            <span>${{ "%.2f"|format(total + (0 if total >= 50 else 9.99) + total * 0.08) }}</span>
+        </div>
+    </div>
+
+    <div class="cart-actions">
+        <a href="{{ url_for('user.home') }}" class="btn btn-outline">← Continue Shopping</a>
+        <a href="{{ url_for('user.checkout') }}" class="btn btn-success btn-lg">💳 Proceed to Checkout</a>
+    </div>
+</div>
+{% else %}
+<div class="empty-state">
+    <div class="empty-state-icon">🛒</div>
+    <p>Your cart is empty.</p>
+    <a href="{{ url_for('user.home') }}" class="btn">Start Shopping</a>
+</div>
+{% endif %}
+{% endblock %}

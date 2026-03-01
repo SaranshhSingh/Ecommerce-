@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% block title %}{{ title }} - FlaskShop{% endblock %}
+
+{% block content %}
+<div class="breadcrumb">
+    <a href="{{ url_for('admin.dashboard') }}">Dashboard</a>
+    <span class="sep">›</span>
+    <a href="{{ url_for('admin.products') }}">Products</a>
+    <span class="sep">›</span>
+    <span>{{ title }}</span>
+</div>
+
+<div class="page-header">
+    <h1>{{ title }}</h1>
+</div>
+
+<div class="form-container">
+    <form method="POST">
+        {{ form.hidden_tag() }}
+
+        <div class="form-group">
+            {{ form.name.label }}
+            {{ form.name(class="form-control", placeholder="Product name") }}
+            {% for error in form.name.errors %}
+            <span class="form-error">{{ error }}</span>
+            {% endfor %}
+        </div>
+
+        <div class="form-row">
+            <div class="form-group half">
+                {{ form.price.label }}
+                {{ form.price(class="form-control", placeholder="0.00", step="0.01") }}
+                {% for error in form.price.errors %}
+                <span class="form-error">{{ error }}</span>
+                {% endfor %}
+            </div>
+
+            <div class="form-group half">
+                {{ form.stock.label }}
+                {{ form.stock(class="form-control", placeholder="0") }}
+                {% for error in form.stock.errors %}
+                <span class="form-error">{{ error }}</span>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group half">
+                {{ form.category_id.label }}
+                {{ form.category_id(class="form-control") }}
+                {% for error in form.category_id.errors %}
+                <span class="form-error">{{ error }}</span>
+                {% endfor %}
+            </div>
+
+            <div class="form-group half" style="display: flex; align-items: center; padding-top: 24px;">
+                {{ form.is_featured(id="is_featured") }}
+                <label for="is_featured" style="margin-left: 8px; margin-bottom: 0; cursor: pointer;">⭐ Featured
+                    Product</label>
+            </div>
+        </div>
+
+        <div class="form-group">
+            {{ form.description.label }}
+            {{ form.description(class="form-control", rows=4, placeholder="Product description...") }}
+            {% for error in form.description.errors %}
+            <span class="form-error">{{ error }}</span>
+            {% endfor %}
+        </div>
+
+        <div style="display: flex; gap: 12px; align-items: center;">
+            {{ form.submit(class="btn") }}
+            <a href="{{ url_for('admin.products') }}" class="btn btn-outline">Cancel</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

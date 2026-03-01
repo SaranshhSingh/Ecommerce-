@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block title %}Manage Categories - FlaskShop Admin{% endblock %}
+
+{% block content %}
+<div class="breadcrumb">
+    <a href="{{ url_for('admin.dashboard') }}">Dashboard</a>
+    <span class="sep">›</span>
+    <span>Categories</span>
+</div>
+
+<div class="page-header">
+    <h1>📁 Manage Categories</h1>
+    <a href="{{ url_for('admin.add_category') }}" class="btn">+ Add Category</a>
+</div>
+
+{% if categories %}
+<div class="table-wrapper">
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Icon</th>
+                <th>Name</th>
+                <th>Slug</th>
+                <th>Products</th>
+                <th>Description</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for cat in categories %}
+            <tr>
+                <td style="font-size: 1.5rem;">{{ cat.icon }}</td>
+                <td><strong>{{ cat.name }}</strong></td>
+                <td><code>{{ cat.slug }}</code></td>
+                <td>{{ cat.products|length }}</td>
+                <td>{{ (cat.description or '—')[:80] }}</td>
+                <td>
+                    <div style="display: flex; gap: 8px;">
+                        <a href="{{ url_for('admin.edit_category', category_id=cat.id) }}"
+                            class="btn btn-xs btn-outline">Edit</a>
+                        <form method="POST" action="{{ url_for('admin.delete_category', category_id=cat.id) }}"
+                            style="display:inline;">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <button type="submit" class="btn btn-xs btn-danger"
+                                onclick="return confirm('Delete {{ cat.name }}?')">Delete</button>
+                        </form>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<div class="empty-state">
+    <div class="empty-state-icon">📁</div>
+    <p>No categories yet.</p>
+    <a href="{{ url_for('admin.add_category') }}" class="btn">Create First Category</a>
+</div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,201 @@
+{% extends "base.html" %}
+{% block title %}FlaskShop - Browse Products{% endblock %}
+
+{% block content %}
+<!-- Hero Banner -->
+{% if not active_category and not search_query %}
+<div class="hero">
+    <h1>🛍️ Discover Premium Products</h1>
+    <p>Explore our curated collection of quality items across {{ categories|length }} categories. From everyday
+        essentials to exclusive finds — shop with confidence.</p>
+    <a href="#products" class="btn">Browse Collection →</a>
+</div>
+{% endif %}
+
+<!-- Category Strip -->
+{% if categories %}
+<div class="category-strip" id="categoryStrip">
+    <a href="{{ url_for('user.home') }}" class="category-pill {% if not active_category %}active{% endif %}">
+        <span class="category-pill-icon">🏷️</span>
+        <span>All</span>
+    </a>
+    {% for cat in categories %}
+    <a href="{{ url_for('user.home', category=cat.slug) }}"
+        class="category-pill {% if active_category == cat.slug %}active{% endif %}">
+        <span class="category-pill-icon">{{ cat.icon }}</span>
+        <span>{{ cat.name }}</span>
+    </a>
+    {% endfor %}
+</div>
+{% endif %}
+
+<!-- Current Category Header -->
+{% if current_category is defined and current_category %}
+<div class="page-header">
+    <div>
+        <h1>{{ current_category.icon }} {{ current_category.name }}</h1>
+        <p>{{ current_category.description }}</p>
+    </div>
+    <span class="results-count">{{ products|length }} product{{ 's' if products|length != 1 }}</span>
+</div>
+{% endif %}
+
+<!-- Search Results Header -->
+{% if search_query %}
+<div class="page-header">
+    <div>
+        <h1>🔍 Search: "{{ search_query }}"</h1>
+        <p>{{ products|length }} result{{ 's' if products|length != 1 }} found</p>
+    </div>
+</div>
+{% endif %}
+
+<!-- Featured Products -->
+{% if featured and not active_category and not search_query %}
+<section class="section-block" id="featured">
+    <div class="section-header">
+        <h2>⭐ Featured Products</h2>
+        <p>Hand-picked top sellers and staff favorites</p>
+    </div>
+    <div class="product-grid">
+        {% for product in featured %}
+        <div class="product-card featured-card">
+            <div class="featured-badge">⭐ Featured</div>
+            <div class="product-image">
+                <svg class="product-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <path
+                        d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
+                    <polyline points="3.27 6.96 12 12.01 20.73 6.96" />
+                    <line x1="12" y1="22.08" x2="12" y2="12" />
+                </svg>
+            </div>
+            <div class="product-info">
+                {% if product.category %}
+                <span class="category-badge">{{ product.category.icon }} {{ product.category.name }}</span>
+                {% endif %}
+                <h3>{{ product.name }}</h3>
+                <p class="product-price">${{ "%.2f"|format(product.price) }}</p>
+                <p class="product-stock">
+                    {% if product.stock > 5 %}
+                    <span class="stock-good">✓ In Stock</span>
+                    {% elif product.stock > 0 %}
+                    <span class="stock-low">⚡ Only {{ product.stock }} left!</span>
+                    {% endif %}
+                </p>
+                <div class="product-actions">
+                    <a href="{{ url_for('user.product_detail', product_id=product.id) }}"
+                        class="btn btn-sm btn-outline">View Details</a>
+                    {% if current_user.is_authenticated and not current_user.is_admin and product.stock > 0 %}
+                    <form method="POST" action="{{ url_for('user.add_to_cart', product_id=product.id) }}"
+                        style="display:inline;">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button type="submit" class="btn btn-sm">Add to Cart</button>
+                    </form>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+{% endif %}
+
+<!-- New Arrivals -->
+{% if new_arrivals and not active_category and not search_query %}
+<section class="section-block" id="new-arrivals">
+    <div class="section-header">
+        <h2>🆕 New Arrivals</h2>
+        <p>Fresh additions to our collection</p>
+    </div>
+    <div class="product-scroll">
+        {% for product in new_arrivals %}
+        <div class="product-card compact-card">
+            <div class="product-image compact-image">
+                <svg class="product-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <path
+                        d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
+                    <polyline points="3.27 6.96 12 12.01 20.73 6.96" />
+                    <line x1="12" y1="22.08" x2="12" y2="12" />
+                </svg>
+            </div>
+            <div class="product-info">
+                {% if product.category %}
+                <span class="category-badge small">{{ product.category.icon }} {{ product.category.name }}</span>
+                {% endif %}
+                <h3>{{ product.name }}</h3>
+                <p class="product-price">${{ "%.2f"|format(product.price) }}</p>
+                <a href="{{ url_for('user.product_detail', product_id=product.id) }}"
+                    class="btn btn-sm btn-outline">View →</a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+{% endif %}
+
+<!-- All Products Section -->
+<div id="products">
+    {% if not current_category is defined or not current_category %}
+    {% if not search_query %}
+    <div class="section-header">
+        <h2>🛍️ All Products</h2>
+        <p>Browse our complete selection of {{ products|length }} product{{ 's' if products|length != 1 }}</p>
+    </div>
+    {% endif %}
+    {% endif %}
+
+    {% if products %}
+    <div class="product-grid">
+        {% for product in products %}
+        <div class="product-card">
+            <div class="product-image">
+                <svg class="product-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <path
+                        d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
+                    <polyline points="3.27 6.96 12 12.01 20.73 6.96" />
+                    <line x1="12" y1="22.08" x2="12" y2="12" />
+                </svg>
+            </div>
+            <div class="product-info">
+                {% if product.category %}
+                <span class="category-badge">{{ product.category.icon }} {{ product.category.name }}</span>
+                {% endif %}
+                <h3>{{ product.name }}</h3>
+                <p class="product-price">${{ "%.2f"|format(product.price) }}</p>
+                <p class="product-stock">
+                    {% if product.stock > 5 %}
+                    <span class="stock-good">✓ In Stock ({{ product.stock }})</span>
+                    {% elif product.stock > 0 %}
+                    <span class="stock-low">⚡ Only {{ product.stock }} left!</span>
+                    {% else %}
+                    <span class="stock-out">✗ Out of Stock</span>
+                    {% endif %}
+                </p>
+                <div class="product-actions">
+                    <a href="{{ url_for('user.product_detail', product_id=product.id) }}"
+                        class="btn btn-sm btn-outline">View Details</a>
+                    {% if current_user.is_authenticated and not current_user.is_admin and product.stock > 0 %}
+                    <form method="POST" action="{{ url_for('user.add_to_cart', product_id=product.id) }}"
+                        style="display:inline;">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button type="submit" class="btn btn-sm">Add to Cart</button>
+                    </form>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <div class="empty-state-icon">📦</div>
+        <p>No products found{% if search_query %} for "{{ search_query }}"{% endif %}{% if active_category %} in this
+            category{% endif %}.</p>
+        <a href="{{ url_for('user.home') }}" class="btn">Browse All Products</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

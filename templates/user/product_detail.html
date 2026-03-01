@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% block title %}{{ product.name }} - FlaskShop{% endblock %}
+
+{% block content %}
+<div class="breadcrumb">
+    <a href="{{ url_for('user.home') }}">Products</a>
+    {% if product.category %}
+    <span class="sep">›</span>
+    <a href="{{ url_for('user.home', category=product.category.slug) }}">{{ product.category.name }}</a>
+    {% endif %}
+    <span class="sep">›</span>
+    <span>{{ product.name }}</span>
+</div>
+
+<div class="product-detail">
+    <div class="product-detail-image">
+        <svg class="product-icon" style="width:96px;height:96px;opacity:0.5" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path
+                d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
+            <polyline points="3.27 6.96 12 12.01 20.73 6.96" />
+            <line x1="12" y1="22.08" x2="12" y2="12" />
+        </svg>
+    </div>
+    <div class="product-detail-info">
+        {% if product.category %}
+        <span class="category-badge">{{ product.category.icon }} {{ product.category.name }}</span>
+        {% endif %}
+        {% if product.is_featured %}
+        <span class="featured-badge-inline">⭐ Featured</span>
+        {% endif %}
+        <h1>{{ product.name }}</h1>
+        <p class="product-price-lg">${{ "%.2f"|format(product.price) }}</p>
+        <p class="product-description">{{ product.description or 'No description available.' }}</p>
+
+        <div class="product-meta">
+            {% if product.stock > 0 %}
+            <span class="product-meta-badge">
+                <span class="stock-good">✅ In Stock ({{ product.stock }} available)</span>
+            </span>
+            {% else %}
+            <span class="product-meta-badge">
+                <span class="stock-out">❌ Out of Stock</span>
+            </span>
+            {% endif %}
+        </div>
+
+        {% if current_user.is_authenticated and not current_user.is_admin and product.stock > 0 %}
+        <form method="POST" action="{{ url_for('user.add_to_cart', product_id=product.id) }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button type="submit" class="btn">🛒 Add to Cart</button>
+        </form>
+        {% endif %}
+        <a href="{{ url_for('user.home') }}" class="btn btn-ghost" style="margin-top: 12px;">← Back to Products</a>
+    </div>
+</div>
+
+<!-- Related Products -->
+{% if related %}
+<section class="section-block">
+    <div class="section-header">
+        <h2>🔗 You Might Also Like</h2>
+        <p>More from {{ product.category.name }}</p>
+    </div>
+    <div class="product-scroll">
+        {% for p in related %}
+        <div class="product-card compact-card">
+            <div class="product-image compact-image">
+                <svg class="product-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <path
+                        d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
+                    <polyline points="3.27 6.96 12 12.01 20.73 6.96" />
+                    <line x1="12" y1="22.08" x2="12" y2="12" />
+                </svg>
+            </div>
+            <div class="product-info">
+                <h3>{{ p.name }}</h3>
+                <p class="product-price">${{ "%.2f"|format(p.price) }}</p>
+                <a href="{{ url_for('user.product_detail', product_id=p.id) }}" class="btn btn-sm btn-outline">View
+                    →</a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+{% endif %}
+{% endblock %}

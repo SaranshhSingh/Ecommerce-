@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}{{ title }} - FlaskShop Admin{% endblock %}
+
+{% block content %}
+<div class="breadcrumb">
+    <a href="{{ url_for('admin.dashboard') }}">Dashboard</a>
+    <span class="sep">›</span>
+    <a href="{{ url_for('admin.categories') }}">Categories</a>
+    <span class="sep">›</span>
+    <span>{{ title }}</span>
+</div>
+
+<div class="page-header">
+    <h1>{{ title }}</h1>
+</div>
+
+<div class="form-container">
+    <form method="POST">
+        {{ form.hidden_tag() }}
+
+        <div class="form-group">
+            {{ form.name.label }}
+            {{ form.name(class="form-control", placeholder="Category name") }}
+            {% for error in form.name.errors %}
+            <span class="form-error">{{ error }}</span>
+            {% endfor %}
+        </div>
+
+        <div class="form-group">
+            {{ form.icon.label }}
+            {{ form.icon(class="form-control", placeholder="📦") }}
+            {% for error in form.icon.errors %}
+            <span class="form-error">{{ error }}</span>
+            {% endfor %}
+            <small class="form-help">Paste an emoji to use as the category icon</small>
+        </div>
+
+        <div class="form-group">
+            {{ form.description.label }}
+            {{ form.description(class="form-control", rows=3, placeholder="Brief category description...") }}
+            {% for error in form.description.errors %}
+            <span class="form-error">{{ error }}</span>
+            {% endfor %}
+        </div>
+
+        <div style="display: flex; gap: 12px; align-items: center;">
+            {{ form.submit(class="btn") }}
+            <a href="{{ url_for('admin.categories') }}" class="btn btn-outline">Cancel</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}My Orders - FlaskShop{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>📋 My Orders</h1>
+</div>
+
+{% if orders %}
+<div class="order-cards">
+    {% for order in orders %}
+    <div class="order-card status-card-{{ order.status }}">
+        <div class="order-card-info">
+            <h4>Order #{{ order.id }}</h4>
+            <span class="order-card-date">{{ order.created_at.strftime('%B %d, %Y at %H:%M') }}</span>
+        </div>
+        <div class="order-card-right">
+            <span class="order-card-total">${{ "%.2f"|format(order.total_price) }}</span>
+            <span class="status status-{{ order.status }}">{{ order.status | capitalize }}</span>
+            <a href="{{ url_for('user.order_detail', order_id=order.id) }}" class="btn btn-sm btn-outline">View</a>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="empty-state">
+    <div class="empty-state-icon">📋</div>
+    <p>You haven't placed any orders yet.</p>
+    <a href="{{ url_for('user.home') }}" class="btn">Start Shopping</a>
+</div>
+{% endif %}
+{% endblock %}

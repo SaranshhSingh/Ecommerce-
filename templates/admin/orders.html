@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}All Orders - FlaskShop{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>📋 All Orders</h1>
+</div>
+
+{% if orders %}
+<div class="table-wrapper">
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Order #</th>
+                <th>Customer</th>
+                <th>Total</th>
+                <th>Status</th>
+                <th>Date</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for order in orders %}
+            <tr>
+                <td><strong>#{{ order.id }}</strong></td>
+                <td>{{ order.user.name }}</td>
+                <td>${{ "%.2f"|format(order.total_price) }}</td>
+                <td><span class="status status-{{ order.status }}">{{ order.status | capitalize }}</span></td>
+                <td>{{ order.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                <td><a href="{{ url_for('admin.order_detail', order_id=order.id) }}"
+                        class="btn btn-xs btn-outline">Manage</a></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<div class="empty-state">
+    <div class="empty-state-icon">📋</div>
+    <p>No orders yet.</p>
+</div>
+{% endif %}
+
+<a href="{{ url_for('admin.dashboard') }}" class="btn btn-outline" style="margin-top:24px;">← Back to Dashboard</a>
+{% endblock %}

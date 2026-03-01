@@ -1,0 +1,328 @@
+{% extends "base.html" %}
+{% block title %}Checkout - FlaskShop{% endblock %}
+
+{% block content %}
+<div class="breadcrumb">
+    <a href="{{ url_for('user.cart') }}">Cart</a>
+    <span class="sep">›</span>
+    <span>Checkout</span>
+</div>
+
+<div class="page-header">
+    <h1>💳 Secure Checkout</h1>
+</div>
+
+<div class="checkout-layout">
+    <!-- Left: Forms -->
+    <div class="checkout-forms">
+        <form method="POST" id="checkoutForm">
+            {{ form.hidden_tag() }}
+
+            <!-- Step Indicators -->
+            <div class="checkout-steps">
+                <div class="checkout-step active" data-step="1">
+                    <div class="checkout-step-num">1</div>
+                    <span>Shipping</span>
+                </div>
+                <div class="checkout-step-line"></div>
+                <div class="checkout-step" data-step="2">
+                    <div class="checkout-step-num">2</div>
+                    <span>Payment</span>
+                </div>
+                <div class="checkout-step-line"></div>
+                <div class="checkout-step" data-step="3">
+                    <div class="checkout-step-num">3</div>
+                    <span>Review</span>
+                </div>
+            </div>
+
+            <!-- Step 1: Shipping Info -->
+            <div class="checkout-panel" id="step1">
+                <h3>📦 Shipping Information</h3>
+
+                <div class="form-group">
+                    {{ form.full_name.label }}
+                    {{ form.full_name(class="form-control", placeholder="John Doe", id="full_name") }}
+                    {% for error in form.full_name.errors %}
+                    <span class="form-error">{{ error }}</span>
+                    {% endfor %}
+                </div>
+
+                <div class="form-group">
+                    {{ form.address.label }}
+                    {{ form.address(class="form-control", placeholder="123 Main Street, Apt 4B", id="address") }}
+                    {% for error in form.address.errors %}
+                    <span class="form-error">{{ error }}</span>
+                    {% endfor %}
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group half">
+                        {{ form.city.label }}
+                        {{ form.city(class="form-control", placeholder="San Francisco", id="city") }}
+                        {% for error in form.city.errors %}
+                        <span class="form-error">{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                    <div class="form-group half">
+                        {{ form.state.label }}
+                        {{ form.state(class="form-control", placeholder="California", id="state") }}
+                        {% for error in form.state.errors %}
+                        <span class="form-error">{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group half">
+                        {{ form.zip_code.label }}
+                        {{ form.zip_code(class="form-control", placeholder="94102", id="zip_code") }}
+                        {% for error in form.zip_code.errors %}
+                        <span class="form-error">{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                    <div class="form-group half">
+                        {{ form.phone.label }}
+                        {{ form.phone(class="form-control", placeholder="+1 (555) 123-4567", id="phone") }}
+                        {% for error in form.phone.errors %}
+                        <span class="form-error">{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <button type="button" class="btn" onclick="goToStep(2)">Continue to Payment →</button>
+            </div>
+
+            <!-- Step 2: Payment Info -->
+            <div class="checkout-panel hidden" id="step2">
+                <h3>💳 Payment Details</h3>
+
+                <!-- Card Preview -->
+                <div class="card-preview">
+                    <div class="card-preview-front">
+                        <div class="card-preview-type" id="cardType">💳</div>
+                        <div class="card-preview-number" id="cardPreviewNumber">•••• •••• •••• ••••</div>
+                        <div class="card-preview-bottom">
+                            <div>
+                                <small>CARDHOLDER</small>
+                                <div id="cardPreviewName">YOUR NAME</div>
+                            </div>
+                            <div>
+                                <small>EXPIRES</small>
+                                <div id="cardPreviewExpiry">MM/YY</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    {{ form.cardholder_name.label }}
+                    {{ form.cardholder_name(class="form-control", placeholder="John Doe", id="cardholder_name",
+                    autocomplete="cc-name") }}
+                    {% for error in form.cardholder_name.errors %}
+                    <span class="form-error">{{ error }}</span>
+                    {% endfor %}
+                </div>
+
+                <div class="form-group">
+                    {{ form.card_number.label }}
+                    {{ form.card_number(class="form-control", placeholder="1234 5678 9012 3456", id="card_number",
+                    autocomplete="cc-number", maxlength="19") }}
+                    {% for error in form.card_number.errors %}
+                    <span class="form-error">{{ error }}</span>
+                    {% endfor %}
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group half">
+                        {{ form.card_expiry.label }}
+                        {{ form.card_expiry(class="form-control", placeholder="MM/YY", id="card_expiry",
+                        autocomplete="cc-exp", maxlength="5") }}
+                        {% for error in form.card_expiry.errors %}
+                        <span class="form-error">{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                    <div class="form-group half">
+                        {{ form.card_cvv.label }}
+                        {{ form.card_cvv(class="form-control", placeholder="123", id="card_cvv", autocomplete="cc-csc",
+                        maxlength="4", type="password") }}
+                        {% for error in form.card_cvv.errors %}
+                        <span class="form-error">{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div class="checkout-nav-btns">
+                    <button type="button" class="btn btn-outline" onclick="goToStep(1)">← Back</button>
+                    <button type="button" class="btn" onclick="goToStep(3)">Review Order →</button>
+                </div>
+            </div>
+
+            <!-- Step 3: Review & Confirm -->
+            <div class="checkout-panel hidden" id="step3">
+                <h3>📋 Review Your Order</h3>
+
+                <div class="review-section">
+                    <h4>Shipping Address</h4>
+                    <div class="review-box" id="reviewShipping">—</div>
+                </div>
+
+                <div class="review-section">
+                    <h4>Payment Method</h4>
+                    <div class="review-box" id="reviewPayment">—</div>
+                </div>
+
+                <div class="review-section">
+                    <h4>Order Items</h4>
+                    <div class="review-items">
+                        {% for item in cart_items %}
+                        <div class="review-item">
+                            <span>{{ item.product.name }} × {{ item.quantity }}</span>
+                            <span>${{ "%.2f"|format(item.product.price * item.quantity) }}</span>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div class="checkout-nav-btns">
+                    <button type="button" class="btn btn-outline" onclick="goToStep(2)">← Back</button>
+                    {{ form.submit(class="btn btn-success btn-lg", id="placeOrderBtn") }}
+                </div>
+
+                <p class="secure-note">🔒 Your payment information is encrypted and secure.</p>
+            </div>
+        </form>
+    </div>
+
+    <!-- Right: Order Summary -->
+    <div class="checkout-summary">
+        <div class="summary-card">
+            <h3>Order Summary</h3>
+            <div class="summary-items">
+                {% for item in cart_items %}
+                <div class="summary-item">
+                    <div class="summary-item-info">
+                        <span class="summary-item-name">{{ item.product.name }}</span>
+                        <span class="summary-item-qty">× {{ item.quantity }}</span>
+                    </div>
+                    <span class="summary-item-price">${{ "%.2f"|format(item.product.price * item.quantity) }}</span>
+                </div>
+                {% endfor %}
+            </div>
+            <div class="summary-divider"></div>
+            <div class="summary-row">
+                <span>Subtotal</span>
+                <span>${{ "%.2f"|format(subtotal) }}</span>
+            </div>
+            <div class="summary-row">
+                <span>Shipping</span>
+                <span>{% if shipping == 0 %}<span class="text-success">FREE</span>{% else %}${{ "%.2f"|format(shipping)
+                    }}{% endif %}</span>
+            </div>
+            <div class="summary-row">
+                <span>Tax (8%)</span>
+                <span>${{ "%.2f"|format(tax) }}</span>
+            </div>
+            <div class="summary-divider"></div>
+            <div class="summary-row summary-total">
+                <span>Total</span>
+                <span>${{ "%.2f"|format(total) }}</span>
+            </div>
+            {% if subtotal < 50 %} <p class="summary-note">💡 Spend ${{ "%.2f"|format(50 - subtotal) }} more for free
+                shipping!</p>
+                {% else %}
+                <p class="summary-note text-success">✅ You qualify for free shipping!</p>
+                {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+    let currentStep = 1;
+
+    function goToStep(step) {
+        // Hide all panels
+        document.querySelectorAll('.checkout-panel').forEach(p => p.classList.add('hidden'));
+        document.querySelectorAll('.checkout-step').forEach(s => {
+            s.classList.remove('active', 'completed');
+        });
+
+        // Show target panel
+        document.getElementById('step' + step).classList.remove('hidden');
+
+        // Update step indicators
+        for (let i = 1; i <= 3; i++) {
+            const stepEl = document.querySelector(`.checkout-step[data-step="${i}"]`);
+            if (i < step) stepEl.classList.add('completed');
+            if (i === step) stepEl.classList.add('active');
+        }
+
+        // Update review on step 3
+        if (step === 3) {
+            updateReview();
+        }
+
+        currentStep = step;
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function updateReview() {
+        const name = document.getElementById('full_name').value;
+        const addr = document.getElementById('address').value;
+        const city = document.getElementById('city').value;
+        const state = document.getElementById('state').value;
+        const zip = document.getElementById('zip_code').value;
+        const phone = document.getElementById('phone').value;
+        document.getElementById('reviewShipping').innerHTML =
+            `<strong>${name}</strong><br>${addr}<br>${city}, ${state} ${zip}<br>📞 ${phone}`;
+
+        const cardNum = document.getElementById('card_number').value.replace(/\s/g, '');
+        const last4 = cardNum.slice(-4) || '••••';
+        const cardName = document.getElementById('cardholder_name').value || '—';
+        document.getElementById('reviewPayment').innerHTML =
+            `💳 •••• •••• •••• ${last4}<br>${cardName}`;
+    }
+
+    // Card number formatting
+    const cardInput = document.getElementById('card_number');
+    if (cardInput) {
+        cardInput.addEventListener('input', function (e) {
+            let v = e.target.value.replace(/\D/g, '').substring(0, 16);
+            let formatted = v.replace(/(.{4})/g, '$1 ').trim();
+            e.target.value = formatted;
+
+            // Update card preview
+            const display = formatted || '•••• •••• •••• ••••';
+            document.getElementById('cardPreviewNumber').textContent =
+                display.padEnd(19, ' ').replace(/(\d{4})/g, '$1 ').trim();
+
+            // Detect card type
+            const typeEl = document.getElementById('cardType');
+            if (v.startsWith('4')) typeEl.textContent = '💳 VISA';
+            else if (v.startsWith('5')) typeEl.textContent = '💳 Mastercard';
+            else if (v.startsWith('3')) typeEl.textContent = '💳 Amex';
+            else typeEl.textContent = '💳';
+        });
+    }
+
+    // Cardholder name preview
+    const nameInput = document.getElementById('cardholder_name');
+    if (nameInput) {
+        nameInput.addEventListener('input', function (e) {
+            document.getElementById('cardPreviewName').textContent =
+                e.target.value.toUpperCase() || 'YOUR NAME';
+        });
+    }
+
+    // Expiry formatting
+    const expiryInput = document.getElementById('card_expiry');
+    if (expiryInput) {
+        expiryInput.addEventListener('input', function (e) {
+            let v = e.target.value.replace(/\D/g, '').substring(0, 4);
+            if (v.length >= 2) v = v.substring(0, 2) + '/' + v.substring(2);
+            e.target.value = v;
+            document.getElementById('cardPreviewExpiry').textContent = v || 'MM/YY';
+        });
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% block title %}Search: {{ query }} - FlaskShop{% endblock %}
+
+{% block content %}
+<div class="breadcrumb">
+    <a href="{{ url_for('user.home') }}">Home</a>
+    <span class="sep">›</span>
+    <span>Search Results</span>
+</div>
+
+<div class="page-header">
+    <div>
+        <h1>🔍 Search Results</h1>
+        <p>{{ products|length }} result{{ 's' if products|length != 1 }} for "<strong>{{ query }}</strong>"</p>
+    </div>
+</div>
+
+{% if products %}
+<div class="product-grid">
+    {% for product in products %}
+    <div class="product-card">
+        <div class="product-image">
+            <svg class="product-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
+                stroke-linecap="round" stroke-linejoin="round">
+                <path
+                    d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
+                <polyline points="3.27 6.96 12 12.01 20.73 6.96" />
+                <line x1="12" y1="22.08" x2="12" y2="12" />
+            </svg>
+        </div>
+        <div class="product-info">
+            {% if product.category %}
+            <span class="category-badge">{{ product.category.icon }} {{ product.category.name }}</span>
+            {% endif %}
+            <h3>{{ product.name }}</h3>
+            <p class="product-price">${{ "%.2f"|format(product.price) }}</p>
+            <p class="product-stock">
+                {% if product.stock > 5 %}
+                <span class="stock-good">✓ In Stock ({{ product.stock }})</span>
+                {% elif product.stock > 0 %}
+                <span class="stock-low">⚡ Only {{ product.stock }} left!</span>
+                {% endif %}
+            </p>
+            <div class="product-actions">
+                <a href="{{ url_for('user.product_detail', product_id=product.id) }}"
+                    class="btn btn-sm btn-outline">View Details</a>
+                {% if current_user.is_authenticated and not current_user.is_admin and product.stock > 0 %}
+                <form method="POST" action="{{ url_for('user.add_to_cart', product_id=product.id) }}"
+                    style="display:inline;">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" class="btn btn-sm">Add to Cart</button>
+                </form>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="empty-state">
+    <div class="empty-state-icon">🔍</div>
+    <p>No products found for "<strong>{{ query }}</strong>".</p>
+    <p>Try a different search term or <a href="{{ url_for('user.home') }}">browse all products</a>.</p>
+</div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block title %}Order #{{ order.id }} - FlaskShop{% endblock %}
+
+{% block content %}
+<div class="breadcrumb">
+    <a href="{{ url_for('user.orders') }}">My Orders</a>
+    <span class="sep">›</span>
+    <span>Order #{{ order.id }}</span>
+</div>
+
+<div class="page-header">
+    <h1>📋 Order #{{ order.id }}</h1>
+    <p>Placed on {{ order.created_at.strftime('%B %d, %Y at %H:%M') }}</p>
+</div>
+
+<!-- Order Progress Stepper -->
+{% set statuses = ['pending', 'confirmed', 'shipped', 'delivered'] %}
+{% set current_idx = statuses.index(order.status) if order.status in statuses else 0 %}
+<div class="order-steps">
+    {% for s in statuses %}
+    <div
+        class="order-step {% if loop.index0 <= current_idx %}{% if loop.index0 == current_idx %}active{% else %}completed{% endif %}{% endif %}">
+        <div class="order-step-dot">
+            {% if loop.index0 < current_idx %}✓{% else %}{{ loop.index }}{% endif %} </div>
+                <span class="order-step-label">{{ s | capitalize }}</span>
+        </div>
+        {% endfor %}
+    </div>
+
+    <div class="order-detail-card">
+        <div class="order-meta">
+            <p><strong>Status:</strong> <span class="status status-{{ order.status }}">{{ order.status | capitalize
+                    }}</span></p>
+            <p><strong>Total:</strong> ${{ "%.2f"|format(order.total_price) }}</p>
+        </div>
+
+        <h3>Items</h3>
+        <div class="table-wrapper">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Product</th>
+                        <th>Price</th>
+                        <th>Quantity</th>
+                        <th>Subtotal</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in order.items %}
+                    <tr>
+                        <td>{{ item.product.name }}</td>
+                        <td>${{ "%.2f"|format(item.price) }}</td>
+                        <td>{{ item.quantity }}</td>
+                        <td>${{ "%.2f"|format(item.price * item.quantity) }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <a href="{{ url_for('user.orders') }}" class="btn btn-outline">← Back to Orders</a>
+    {% endblock %}

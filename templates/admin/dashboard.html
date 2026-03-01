@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+{% block title %}Admin Dashboard - FlaskShop{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>📊 Admin Dashboard</h1>
+</div>
+
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-icon">👥</div>
+        <div class="stat-info">
+            <span class="stat-value">{{ total_users }}</span>
+            <span class="stat-label">Users</span>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon">📦</div>
+        <div class="stat-info">
+            <span class="stat-value">{{ total_products }}</span>
+            <span class="stat-label">Products</span>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon">📁</div>
+        <div class="stat-info">
+            <span class="stat-value">{{ total_categories }}</span>
+            <span class="stat-label">Categories</span>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon">🛍️</div>
+        <div class="stat-info">
+            <span class="stat-value">{{ total_orders }}</span>
+            <span class="stat-label">Orders</span>
+        </div>
+    </div>
+    <div class="stat-card stat-card-highlight">
+        <div class="stat-icon">💰</div>
+        <div class="stat-info">
+            <span class="stat-value">${{ "%.2f"|format(total_revenue) }}</span>
+            <span class="stat-label">Revenue</span>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="admin-quick-actions">
+    <h3>Quick Actions</h3>
+    <div class="quick-action-grid">
+        <a href="{{ url_for('admin.add_product') }}" class="quick-action-card">
+            <span class="quick-action-icon">➕</span>
+            <span>Add Product</span>
+        </a>
+        <a href="{{ url_for('admin.add_category') }}" class="quick-action-card">
+            <span class="quick-action-icon">📁</span>
+            <span>Add Category</span>
+        </a>
+        <a href="{{ url_for('admin.products') }}" class="quick-action-card">
+            <span class="quick-action-icon">📦</span>
+            <span>Manage Products</span>
+        </a>
+        <a href="{{ url_for('admin.categories') }}" class="quick-action-card">
+            <span class="quick-action-icon">🏷️</span>
+            <span>Manage Categories</span>
+        </a>
+        <a href="{{ url_for('admin.orders') }}" class="quick-action-card">
+            <span class="quick-action-icon">📋</span>
+            <span>View Orders</span>
+        </a>
+        <a href="{{ url_for('admin.users') }}" class="quick-action-card">
+            <span class="quick-action-icon">👥</span>
+            <span>Manage Users</span>
+        </a>
+    </div>
+</div>
+
+<!-- Recent Orders -->
+<div class="admin-section">
+    <h3>Recent Orders</h3>
+    {% if recent_orders %}
+    <div class="table-wrapper">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Order #</th>
+                    <th>Customer</th>
+                    <th>Total</th>
+                    <th>Status</th>
+                    <th>Payment</th>
+                    <th>Date</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for order in recent_orders %}
+                <tr>
+                    <td><strong>#{{ order.id }}</strong></td>
+                    <td>{{ order.user.name }}</td>
+                    <td>${{ "%.2f"|format(order.total_price) }}</td>
+                    <td><span class="status status-{{ order.status }}">{{ order.status | capitalize }}</span></td>
+                    <td><span class="status status-{{ order.payment_status }}">{{ order.payment_status | capitalize
+                            }}</span></td>
+                    <td>{{ order.created_at.strftime('%b %d, %Y') }}</td>
+                    <td><a href="{{ url_for('admin.order_detail', order_id=order.id) }}"
+                            class="btn btn-xs btn-outline">View</a></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <p class="text-muted">No orders yet.</p>
+    {% endif %}
+</div>
+{% endblock %}

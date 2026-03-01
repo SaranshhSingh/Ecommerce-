@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block title %}Manage Products - FlaskShop{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>📦 Manage Products</h1>
+    <a href="{{ url_for('admin.add_product') }}" class="btn">+ Add Product</a>
+</div>
+
+{% if products %}
+<div class="table-wrapper">
+    <table class="table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Price</th>
+                <th>Stock</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for product in products %}
+            <tr>
+                <td>{{ product.id }}</td>
+                <td><strong>{{ product.name }}</strong></td>
+                <td>${{ "%.2f"|format(product.price) }}</td>
+                <td>
+                    {% if product.stock > 0 %}
+                    <span class="stock-good">{{ product.stock }}</span>
+                    {% else %}
+                    <span class="stock-out">0</span>
+                    {% endif %}
+                </td>
+                <td class="action-buttons">
+                    <a href="{{ url_for('admin.edit_product', product_id=product.id) }}"
+                        class="btn btn-xs btn-outline">Edit</a>
+                    <form method="POST" action="{{ url_for('admin.delete_product', product_id=product.id) }}"
+                        style="display:inline;" onsubmit="return confirm('Delete this product?')">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button type="submit" class="btn btn-xs btn-danger">Delete</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<div class="empty-state">
+    <div class="empty-state-icon">📦</div>
+    <p>No products yet. Add your first product!</p>
+</div>
+{% endif %}
+
+<a href="{{ url_for('admin.dashboard') }}" class="btn btn-outline" style="margin-top:24px;">← Back to Dashboard</a>
+{% endblock %}

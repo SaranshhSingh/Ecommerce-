@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="FlaskShop - Your favorite online store for premium products">
+    <title>{% block title %}FlaskShop{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container nav-container">
+            <a href="{{ url_for('user.home') }}" class="nav-brand">🛒 FlaskShop</a>
+
+            <!-- Search Bar -->
+            <form class="nav-search" action="{{ url_for('user.search') }}" method="GET">
+                <input type="text" name="q" placeholder="Search products..." value="{{ request.args.get('q', '') }}" class="nav-search-input" id="navSearchInput">
+                <button type="submit" class="nav-search-btn" aria-label="Search">🔍</button>
+            </form>
+
+            <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+
+            <div class="nav-links" id="navLinks">
+                <a href="{{ url_for('user.home') }}">Products</a>
+                {% if current_user.is_authenticated %}
+                    {% if current_user.is_admin %}
+                        <a href="{{ url_for('admin.dashboard') }}">Admin Dashboard</a>
+                    {% else %}
+                        <a href="{{ url_for('user.cart') }}">
+                            🛒 Cart
+                            {% set cart_count = current_user.cart_items | length %}
+                            {% if cart_count > 0 %}
+                                <span class="badge">{{ cart_count }}</span>
+                            {% endif %}
+                        </a>
+                        <a href="{{ url_for('user.orders') }}">My Orders</a>
+                    {% endif %}
+                    <span class="nav-user">Hi, {{ current_user.name }}</span>
+                    <a href="{{ url_for('auth.logout') }}" class="btn btn-sm btn-outline" style="border-color: rgba(255,255,255,0.3); color: #fff;">Logout</a>
+                {% else %}
+                    <a href="{{ url_for('auth.login') }}" class="btn btn-sm" style="background: var(--primary-light);">Login</a>
+                    <a href="{{ url_for('auth.register') }}" class="btn btn-sm btn-outline" style="border-color: rgba(255,255,255,0.3); color: #fff;">Register</a>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+
+    <main class="container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">
+                        {{ message }}
+                        <button class="alert-close" onclick="this.parentElement.remove()">&times;</button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-about">
+                    <h4>🛒 FlaskShop</h4>
+                    <p>Your premium destination for quality products. We deliver excellence with every order.</p>
+                </div>
+                <div class="footer-links">
+                    <h4>Shop</h4>
+                    <ul>
+                        <li><a href="{{ url_for('user.home') }}">All Products</a></li>
+                        <li><a href="{{ url_for('user.home', category='electronics') }}">Electronics</a></li>
+                        <li><a href="{{ url_for('user.home', category='fashion') }}">Fashion</a></li>
+                        <li><a href="{{ url_for('user.home', category='home-kitchen') }}">Home & Kitchen</a></li>
+                        <li><a href="{{ url_for('user.home', category='books') }}">Books</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>Categories</h4>
+                    <ul>
+                        <li><a href="{{ url_for('user.home', category='sports-outdoors') }}">Sports & Outdoors</a></li>
+                        <li><a href="{{ url_for('user.home', category='beauty') }}">Beauty</a></li>
+                        <li><a href="{{ url_for('user.home', category='gaming-toys') }}">Gaming & Toys</a></li>
+                        <li><a href="{{ url_for('user.home', category='grocery') }}">Grocery & Gourmet</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>Account</h4>
+                    <ul>
+                        {% if current_user.is_authenticated and not current_user.is_admin %}
+                        <li><a href="{{ url_for('user.cart') }}">Cart</a></li>
+                        <li><a href="{{ url_for('user.orders') }}">My Orders</a></li>
+                        {% endif %}
+                        <li><a href="{{ url_for('auth.login') }}">Login</a></li>
+                        <li><a href="{{ url_for('auth.register') }}">Register</a></li>
+                    </ul>
+                </div>
+                <div class="footer-contact">
+                    <h4>Contact</h4>
+                    <p>📧 support@flaskshop.com</p>
+                    <p>📞 +1 (555) 123-4567</p>
+                    <p>📍 San Francisco, CA</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 FlaskShop. Built with Flask 🐍</p>
+                <div class="footer-payment-icons">
+                    <span>💳 Visa</span>
+                    <span>💳 Mastercard</span>
+                    <span>💳 Amex</span>
+                    <span>🔒 Secure Checkout</span>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Hamburger menu toggle
+        const navToggle = document.getElementById('navToggle');
+        const navLinks = document.getElementById('navLinks');
+        if (navToggle) {
+            navToggle.addEventListener('click', () => {
+                navToggle.classList.toggle('active');
+                navLinks.classList.toggle('active');
+            });
+        }
+
+        // Auto-dismiss alerts after 5s
+        document.querySelectorAll('.alert').forEach(alert => {
+            setTimeout(() => {
+                alert.style.opacity = '0';
+                alert.style.transform = 'translateY(-10px)';
+                setTimeout(() => alert.remove(), 300);
+            }, 5000);
+        });
+    </script>
+</body>
+</html>
